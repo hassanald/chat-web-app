@@ -72,13 +72,19 @@ if (empty(array_filter($_SESSION['error']))){
         "email" => $email,
         'role' => 'user',
         "user_name" => $user_name,
-        "password" => $password
+        "password" => $password,
+        "status" => 0,
+        "images" => [],
+        "about_me" => ""
     ];
     $_SESSION['user'] = [
         "name" => $name,
         "email" => $email,
         'role' => 'user',
         "user_name" => $user_name,
+        "status" => $decodedUsersData[$email]['status'],
+        "images" => [],
+        "about_me" => ""
     ];
     file_put_contents( "../database/users.json" , json_encode($decodedUsersData));
     header("location: ../index.php");

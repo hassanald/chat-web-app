@@ -39,6 +39,7 @@ if (empty($email)) {
             "email" => $email,
             "role" => $decodedUsersData[$email]['role'],
             "user_name" => $decodedUsersData[$email]['user_name'],
+            "status" => $decodedUsersData[$email]['status']
         ];
         header("location: ../index.php");
     }
