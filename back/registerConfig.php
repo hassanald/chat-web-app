@@ -1,14 +1,27 @@
 <?php
 session_start();
 require_once "../helper/helper.php";
+require_once "../database/connection.php";
 
 $name = $_POST['name'];
 $email = $_POST['email'];
 $user_name = $_POST['user_name'];
 $password = $_POST['password'];
 
-$userData = file_get_contents('../database/users.json');
-$decodedUsersData = json_decode($userData , JSON_OBJECT_AS_ARRAY) ?? [];
+//database
+$stmt = $conn->prepare('SELECT * FROM users');
+
+$stmt->execute();
+$res = $stmt->setFetchMode(PDO::FETCH_OBJ);
+$res = $stmt->fetchAll();
+
+//echo "<pre>";
+//print_r(array_column($res , 'email'));
+//echo "</pre>";
+//die();
+
+//$userData = file_get_contents('../database/users.json');
+//$decodedUsersData = json_decode($userData , JSON_OBJECT_AS_ARRAY) ?? [];
 
 $_SESSION['error'] = [
     'name' => '',
@@ -31,12 +44,14 @@ if (empty($name)){
 }
 
 //Email Validation
-if (empty($email)){
+if (empty($email)) {
     $_SESSION['error']['email'] = 'Please fill this field.';
     redirect('register');
-}elseif (array_key_exists($email , $decodedUsersData)){
+//}elseif (array_key_exists($email , $decodedUsersData)){
+}elseif (in_array($email , array_column($res , 'email'))){
     $_SESSION['error']['email'] = 'This email already exists!';
     redirect('register');
+
 }elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)){
     $_SESSION['error']['email'] = 'Invalid email!';
     redirect('register');
@@ -46,7 +61,7 @@ if (empty($email)){
 if (empty($user_name)){
     $_SESSION['error']['user_name'] = 'Please fill this field.';
     redirect('register');
-}elseif (in_array($user_name , array_column($decodedUsersData , 'user_name'))){
+}elseif (in_array($user_name , array_column($res , 'user_name'))){
     $_SESSION['error']['user_name'] = 'This username already exists!';
     redirect('register');
 }elseif (strlen($user_name) < 3 || strlen($user_name) > 32){
@@ -67,26 +82,35 @@ if (empty($password)){
 }
 
 if (empty(array_filter($_SESSION['error']))){
-    $decodedUsersData[$email] = [
-        "name" => $name,
-        "email" => $email,
-        'role' => 'user',
-        "user_name" => $user_name,
-        "password" => $password,
-        "status" => 0,
-        "images" => [],
-        "about_me" => ""
-    ];
+//    $decodedUsersData[$email] = [
+//        "name" => $name,
+//        "email" => $email,
+//        'role' => 'user',
+//        "user_name" => $user_name,
+//        "password" => $password,
+//        "status" => 0,
+//        "images" => [],
+//        "about_me" => ""
+//    ];
+//    var_dump($password);
+//    die();
+    $insert = $conn->prepare('INSERT INTO users (name, email, password, user_name) VALUES (:name ,:email ,:password ,:user_name)');
+    $insert->bindParam(':name' , $name);
+    $insert->bindParam(':email' , $email);
+    $insert->bindParam(':password' , $password);
+    $insert->bindParam(':user_name' , $user_name);
+    $insert->execute();
+
     $_SESSION['user'] = [
         "name" => $name,
         "email" => $email,
         'role' => 'user',
         "user_name" => $user_name,
-        "status" => $decodedUsersData[$email]['status'],
+        "status" => 0,
         "images" => [],
         "about_me" => ""
     ];
-    file_put_contents( "../database/users.json" , json_encode($decodedUsersData));
+//    file_put_contents( "../database/users.json" , json_encode($decodedUsersData));
     header("location: ../index.php");
 }
 
