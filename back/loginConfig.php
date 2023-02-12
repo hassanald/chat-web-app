@@ -1,12 +1,21 @@
 <?php
 session_start();
 require_once "../helper/helper.php";
+require_once "../database/connection.php";
 
 $email = $_POST['email'];
 $password = $_POST['password'];
 
-$userData = file_get_contents('../database/users.json');
-$decodedUsersData = json_decode($userData , JSON_OBJECT_AS_ARRAY) ?? [];
+//$userData = file_get_contents('../database/users.json');
+//$decodedUsersData = json_decode($userData , JSON_OBJECT_AS_ARRAY) ?? [];
+
+$stmt = $conn->prepare('SELECT * FROM users WHERE email = :email');
+$stmt->bindParam(':email' , $email);
+$stmt->execute();
+$res = $stmt->setFetchMode(PDO::FETCH_OBJ);
+$res = $stmt->fetch();
+
+
 $_SESSION['error'] = [
     'email' => '',
     'password' => ''
@@ -28,18 +37,18 @@ if (empty($email)) {
 }elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)){
     $_SESSION['error']['email'] = 'Invalid email!';
     redirect('login');
-}elseif (array_key_exists($email , $decodedUsersData)){
-    if ($decodedUsersData[$email]['password'] != $password) {
+}elseif (!empty($res)){
+    if ($res->password != $password) {
         $_SESSION['error']['password'] = "Bad credentials";
         header("location: ../front/login.php");
         exit();
     }else {
         $_SESSION['user'] = [
-            "name" => $decodedUsersData[$email]['name'],
-            "email" => $email,
-            "role" => $decodedUsersData[$email]['role'],
-            "user_name" => $decodedUsersData[$email]['user_name'],
-            "status" => $decodedUsersData[$email]['status']
+            "name" => $res->name,
+            "email" => $res->email,
+            "role" => $res->role,
+            "user_name" => $res->user_name,
+            "status" => $res->status
         ];
         header("location: ../index.php");
     }
