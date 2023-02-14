@@ -101,15 +101,12 @@ if (empty(array_filter($_SESSION['error']))){
     $insert->bindParam(':user_name' , $user_name);
     $insert->execute();
 
-    $_SESSION['user'] = [
-        "name" => $name,
-        "email" => $email,
-        'role' => 'user',
-        "user_name" => $user_name,
-        "status" => 0,
-        "images" => [],
-        "about_me" => ""
-    ];
+    $registeredUserStmt = $conn->prepare('SELECT * FROM users WHERE email = :email');
+    $registeredUserStmt->bindParam(':email' , $email);
+    $registeredUserStmt->execute();
+    $registeredUser = $registeredUserStmt->fetch(PDO::FETCH_OBJ);
+
+    $_SESSION['user'] = $registeredUser;
 //    file_put_contents( "../database/users.json" , json_encode($decodedUsersData));
     header("location: ../index.php");
 }

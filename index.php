@@ -4,7 +4,7 @@ session_start();
 if (!isset($_SESSION['user'])){
     header('Location: ./front/login.php');
     exit();
-}elseif ($_SESSION['user']['role'] == 'admin' and $_SESSION['user']['status'] !== 1){
+}elseif ($_SESSION['user']->role == 'admin' and $_SESSION['user']['status'] !== 1){
     header('Location: ./front/adminUser.php');
     exit();
 }
@@ -37,7 +37,7 @@ if (!empty($chatData)){
 <body>
     <div class="w-3/5 bg-gray-300 p-5 rounded-lg mx-auto mt-24">
         <div class="p-3 flex justify-between items-center">
-            <h1 class="font-semibold">Welcome, <span class="text-blue-900"><?php echo $_SESSION['user']['name'] ?></span></h1>
+            <h1 class="font-semibold">Welcome, <span class="text-blue-900"><?php echo $_SESSION['user']->name ?></span></h1>
             <div class="flex gap-2">
                 <form action="" method="post">
                     <button class="text-white py-2 px-3 bg-red-600 rounded-lg" name="logout">Log Out</button>
@@ -54,7 +54,7 @@ if (!empty($chatData)){
             <?php
             }else{
                 foreach ($chatData as $key => $message) {
-                    if ($message['user_name'] == $_SESSION['user']['user_name']){
+                    if ($message['user_name'] == $_SESSION['user']->user_name){
                         if (isset($message['type'])){
             ?>
                             <div class="flex justify-end items-center w-full my-1">
@@ -130,7 +130,7 @@ if (!empty($chatData)){
             ?>
         </div>
         <?php
-            if ($_SESSION['user']['status'] == 1){
+            if ($_SESSION['user']->status == 1){
         ?>
                 <div class="flex items-center bg-white border-4 border-gray-400 w-3/5 rounded-lg shadow-lg my-3 mx-auto">
                     <p class="text-red-500 px-3 py-2 font-semibold">You can't send any message because you've been blocked by admin!</p>

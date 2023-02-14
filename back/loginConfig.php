@@ -43,13 +43,7 @@ if (empty($email)) {
         header("location: ../front/login.php");
         exit();
     }else {
-        $_SESSION['user'] = [
-            "name" => $res->name,
-            "email" => $res->email,
-            "role" => $res->role,
-            "user_name" => $res->user_name,
-            "status" => $res->status
-        ];
+        $_SESSION['user'] = $res;
         header("location: ../index.php");
     }
 }else {
