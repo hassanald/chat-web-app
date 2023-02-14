@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once "./database/connection.php";
 
 if (!isset($_SESSION['user'])){
     header('Location: ./front/login.php');
@@ -16,10 +17,28 @@ if (isset($_POST['logout'])){
 }
 
 
-$chatData = json_decode(file_get_contents('./database/messages.json') , JSON_FORCE_OBJECT) ?? "";
-if (!empty($chatData)){
-    array_multisort(array_column($chatData , 'date') , SORT_ASC , $chatData );
+//$chatData = json_decode(file_get_contents('./database/messages.json') , JSON_FORCE_OBJECT) ?? "";
+
+$stmtMsg = $conn->prepare('SELECT * FROM messages');
+$stmtMsg->execute();
+$stmtMsgRes = $stmtMsg->fetchAll(5);
+
+$stmtUsr = $conn->prepare('SELECT * FROM users');
+$stmtUsr->execute();
+$stmtUsrRes = $stmtUsr->fetchAll(5);
+
+//$stmtImg = $conn->prepare('SELECT * FROM images');
+//$stmtImg->execute();
+//$stmtImgRes = $stmtImg->fetchAll(5);
+
+if (!empty($stmtMsgRes)){
+    array_multisort(array_column($stmtMsgRes , 'date') , SORT_ASC , $stmtMsgRes );
 }
+
+//echo "<pre>";
+//print_r($stmtImgRes);
+//echo "</pre>";
+//die();
 ?>
 <!doctype html>
 <html lang="en">
@@ -48,36 +67,42 @@ if (!empty($chatData)){
         <div class="flex flex-col bg-white w-3/5 rounded-lg overflow-y-auto relative bottom-0 h-96 shadow-lg p-3 mx-auto">
 
             <?php
-            if (empty($chatData)){
+            if (empty($stmtMsgRes)){
             ?>
                 <p class="flex items-center justify-center text-gray-800 font-semibold">No message here yet...</p>
             <?php
             }else{
-                foreach ($chatData as $key => $message) {
-                    if ($message['user_name'] == $_SESSION['user']->user_name){
-                        if (isset($message['type'])){
-            ?>
+                foreach ($stmtMsgRes as $key => $message) {
+                    if ($message->user_id == $_SESSION['user']->id){
+                        if (!is_null($message->image_id)){
+
+                            $stmtImg = $conn->prepare('SELECT * FROM images WHERE id = :id');
+                            $stmtImg->bindParam(':id', $message->image_id);
+                            $stmtImg->execute();
+                            $stmtImgRes = $stmtImg->fetch(5);
+
+                            ?>
                             <div class="flex justify-end items-center w-full my-1">
                                 <div class="">
                                     <form action="" method="post">
-                                        <input type="hidden" name="edit_message" value="<?php echo $message['message'] ?>">
-                                        <input type="hidden" name="delete_message_user_name" value="<?php echo $message['user_name'] ?>">
+                                        <input type="hidden" name="edit_message" value="<?php echo $message->message ?>">
+                                        <input type="hidden" name="message_id" value="<?php echo $message->id ?>">
                                         <button type="submit" name="edit" class="text-yellow-500 mx-1 hover:underline">edit</button>
                                     </form>
                                 </div>
                                 <div class="">
                                     <form action="./back/delete.php" method="post">
-                                        <input type="hidden" name="delete_message" value="<?php echo $message['name'] ?>">
-                                        <input type="hidden" name="delete_message_path" value="<?php echo $message['full_path'] ?>">
-                                        <input type="hidden" name="delete_message_user_name" value="<?php echo $message['user_name'] ?>">
+                                        <input type="hidden" name="delete_message_id" value="<?php echo $message->id ?>">
+                                        <input type="hidden" name="delete_message_path" value="<?php echo $stmtImgRes->path ?>">
+<!--                                        <input type="hidden" name="delete_message_user_name" value="--><?php //echo $message->user_id ?><!--">-->
                                         <button type="submit" name="delete" class="text-red-500 mx-1 hover:underline">delete</button>
                                     </form>
                                 </div>
                                 <div class="bg-gray-600 shadow-lg self-end text-white my-1 w-1/2 rounded-t-xl rounded-bl-xl">
-                                    <img src="<?php echo './' . $message['full_path']  ?>" class="w-full rounded-t-xl" alt="">
-                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message['user_name'] ?></p>
-                                    <p class="break-words pl-2 pt-1 font-semibold text-white"><?php echo $message['message'] ?></p>
-                                    <p class="text-xs pr-2 font-extralight float-right"><?php echo $message['date'] ?></p>
+                                    <img src="<?php echo './' . $stmtImgRes->path  ?>" class="w-full rounded-t-xl" alt="">
+                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                    <p class="break-words pl-2 pt-1 font-semibold text-white"><?php echo $message->message ?></p>
+                                    <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                                 </div>
                             </div>
             <?php
@@ -86,41 +111,47 @@ if (!empty($chatData)){
                             <div class="flex justify-end items-center w-full my-1">
                                 <div class="">
                                     <form action="" method="post">
-                                        <input type="hidden" name="edit_message" value="<?php echo $message['message'] ?>">
+                                        <input type="hidden" name="edit_message" value="<?php echo $message->message ?>">
+                                        <input type="hidden" name="message_id" value="<?php echo $message->id ?>">
                                         <button type="submit" name="edit" class="text-yellow-500 mx-1 hover:underline">edit</button>
                                     </form>
                                 </div>
                                 <div class="">
                                     <form action="./back/delete.php" method="post">
-                                        <input type="hidden" name="delete_message" value="<?php echo $message['message'] ?>">
-                                        <input type="hidden" name="delete_message_user_name" value="<?php echo $message['user_name'] ?>">
+                                        <input type="hidden" name="delete_message_id" value="<?php echo $message->id ?>">
                                         <button type="submit" name="delete" class="text-red-500 mx-1 hover:underline">delete</button>
                                     </form>
                                 </div>
                                 <div class="bg-gray-600 shadow-lg self-end text-white my-1 w-1/2 rounded-t-xl rounded-bl-xl">
-                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message['user_name'] ?></p>
-                                    <p class="break-words pl-2 pt-1 font-semibold text-white"><?php echo $message['message'] ?></p>
-                                    <p class="text-xs pr-2 font-extralight float-right"><?php echo $message['date'] ?></p>
+                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                    <p class="break-words pl-2 pt-1 font-semibold text-white"><?php echo $message->message ?></p>
+                                    <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                                 </div>
                             </div>
             <?php
                         }
                     }else{
-                        if (isset($message['type'])){
+                        if (!is_null($message->image_id)){
             ?>
                             <div class="bg-blue-200 shadow-lg my-1 w-1/2 rounded-t-xl rounded-br-xl">
-                                <img src="<?php echo './' . $message['full_path']  ?>" class="w-full rounded-t-xl" alt="">
-                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message['user_name'] ?></p>
-                                <p class="break-words pl-2 pt-1 font-semibold text-gray-700"><?php echo $message['message'] ?></p>
-                                <p class="text-xs pr-2 font-extralight float-right"><?php echo $message['date'] ?></p>
+                                <?php
+                                $stmtImg = $conn->prepare('SELECT * FROM images WHERE id = :id');
+                                $stmtImg->bindParam(':id' , $message->image_id);
+                                $stmtImg->execute();
+                                $stmtImgRes = $stmtImg->fetch(5);
+                                ?>
+                                <img src="<?php echo './' . $stmtImgRes->path  ?>" class="w-full rounded-t-xl" alt="">
+                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                <p class="break-words pl-2 pt-1 font-semibold text-gray-700"><?php echo $message->message ?></p>
+                                <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                             </div>
             <?php
                         }else{
             ?>
                             <div class="bg-blue-200 shadow-lg my-1 w-1/2 rounded-t-xl rounded-br-xl">
-                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message['user_name'] ?></p>
-                                <p class="break-words pl-2 pt-1 font-semibold text-gray-700"><?php echo $message['message'] ?></p>
-                                <p class="text-xs pr-2 font-extralight float-right"><?php echo $message['date'] ?></p>
+                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                <p class="break-words pl-2 pt-1 font-semibold text-gray-700"><?php echo $message->message ?></p>
+                                <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                             </div>
             <?php
                         }
@@ -140,7 +171,7 @@ if (!empty($chatData)){
         ?>
             <form action="./back/sendConfig.php" method="post" enctype="multipart/form-data" class="flex items-center bg-white border-4 border-gray-400 w-3/5 rounded-lg shadow-lg my-3 mx-auto">
                 <input id="myText" type="text" class="px-2 py-0.5 w-4/5 rounded-lg outline-none" name="message" value="<?php echo isset($_POST['edit']) ? $_POST['edit_message'] : '' ?>" placeholder="Write your message.">
-                <input type="hidden" name="editedMessageInfo" value="<?php echo isset($_POST['edit']) ? $_POST['edit_message'] : ''?>">
+                <input type="hidden" name="message_id" value="<?php echo isset($_POST['edit']) ? $_POST['message_id'] : ''?>">
                 <input type="file" name="file" class="hidden" id="file">
                 <label for="file" class="cursor-pointer ml-12">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="text-gray-600 w-6 h-6">

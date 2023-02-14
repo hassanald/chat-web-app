@@ -108,7 +108,12 @@ if (isset($_POST['send'])){
 //Edit Logic
 if (isset($_POST['edit_btn'])){
     $edit_message = $_POST['message'];
-    $editedMessageInfo = $_POST['editedMessageInfo'];
+    $message_id = $_POST['message_id'];
+
+//    echo "<pre>";
+//    print_r($message_id);
+//    echo "</pre>";
+//    die();
 
     if (empty($message)){
         $_SESSION['error']['message'] = "Fill this field please!";
@@ -119,13 +124,19 @@ if (isset($_POST['edit_btn'])){
         header("location: ../index.php");
         exit();
     }else {
-        $messageData[$edit_message] = [
-            "user_name" => $messageData[$editedMessageInfo]['user_name'],
-            "message" => $edit_message,
-            "date" => $messageData[$editedMessageInfo]['date']
-        ];
-        unset($messageData[$editedMessageInfo]);
-        file_put_contents("../database/messages.json" , json_encode($messageData , JSON_PRETTY_PRINT));
+//        $messageData[$edit_message] = [
+//            "user_name" => $messageData[$editedMessageInfo]['user_name'],
+//            "message" => $edit_message,
+//            "date" => $messageData[$editedMessageInfo]['date']
+//        ];
+//        unset($messageData[$editedMessageInfo]);
+//        file_put_contents("../database/messages.json" , json_encode($messageData , JSON_PRETTY_PRINT));
+
+        $stmt = $conn->prepare('UPDATE messages SET message = :message WHERE id = :id');
+        $stmt->bindParam(':message' , $edit_message);
+        $stmt->bindParam(':id' , $message_id);
+        $stmt->execute();
+
         header("location: ../index.php");
         exit();
     }

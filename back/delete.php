@@ -1,25 +1,32 @@
 <?php
 session_start();
-$messageData = json_decode(file_get_contents('../database/messages.json') , JSON_FORCE_OBJECT);
+require_once "../database/connection.php";
 
-$deleted_message =  $_POST['delete_message'];
-$deleted_message_user_name =  $_POST['delete_message_user_name'];
+//$messageData = json_decode(file_get_contents('../database/messages.json') , JSON_FORCE_OBJECT);
 
-//echo "<pre>";
-//var_dump($messageData[$deleted_message_user_name .'.'. $deleted_message]);
-//echo "</pre>";
-//die();
-if (isset($_POST['delete_message_path'])) {
-    if (file_exists('../' . $_POST['delete_message_path'])) {
-        unlink('../' . $_POST['delete_message_path']);
+$deleted_message_id =  $_POST['delete_message_id'];
+$deletet_message_image_path = $_POST['delete_message_path'] ?? '';
+
+if ($deletet_message_image_path != '') {
+    if (file_exists('../' . $deletet_message_image_path)) {
+        unlink('../' . $deletet_message_image_path);
     }
-    unset($messageData[$deleted_message_user_name .'.'. $deleted_message]);
-    file_put_contents("../database/messages.json" , json_encode($messageData));
+//    unset($messageData[$deleted_message_user_name .'.'. $deleted_message]);
+//    file_put_contents("../database/messages.json" , json_encode($messageData));
+
+    $stmtDlt = $conn->prepare('DELETE FROM messages WHERE id = :id');
+    $stmtDlt->bindParam(':id' , $deleted_message_id);
+    $stmtDlt->execute();
+
     header("location: ../index.php");
     exit();
 }else{
-    unset($messageData[$deleted_message]);
-    file_put_contents("../database/messages.json", json_encode($messageData));
+//    unset($messageData[$deleted_message]);
+//    file_put_contents("../database/messages.json", json_encode($messageData));
+    $stmtDlt = $conn->prepare('DELETE FROM messages WHERE id = :id');
+    $stmtDlt->bindParam(':id' , $deleted_message_id);
+    $stmtDlt->execute();
+
     header("location: ../index.php");
 }
 
