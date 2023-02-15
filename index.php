@@ -23,22 +23,10 @@ $stmtMsg = $conn->prepare('SELECT * FROM messages');
 $stmtMsg->execute();
 $stmtMsgRes = $stmtMsg->fetchAll(5);
 
-$stmtUsr = $conn->prepare('SELECT * FROM users');
-$stmtUsr->execute();
-$stmtUsrRes = $stmtUsr->fetchAll(5);
-
-//$stmtImg = $conn->prepare('SELECT * FROM images');
-//$stmtImg->execute();
-//$stmtImgRes = $stmtImg->fetchAll(5);
-
 if (!empty($stmtMsgRes)){
     array_multisort(array_column($stmtMsgRes , 'date') , SORT_ASC , $stmtMsgRes );
 }
 
-//echo "<pre>";
-//print_r($stmtImgRes);
-//echo "</pre>";
-//die();
 ?>
 <!doctype html>
 <html lang="en">
@@ -100,7 +88,14 @@ if (!empty($stmtMsgRes)){
                                 </div>
                                 <div class="bg-gray-600 shadow-lg self-end text-white my-1 w-1/2 rounded-t-xl rounded-bl-xl">
                                     <img src="<?php echo './' . $stmtImgRes->path  ?>" class="w-full rounded-t-xl" alt="">
-                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                    <?php
+                                        $stmtUsr = $conn->prepare('SELECT * FROM users WHERE id = :id');
+                                        $stmtUsr->bindParam(':id' , $message->user_id);
+                                        $stmtUsr->execute();
+                                        $stmtUsrRes = $stmtUsr->fetch(5);
+
+                                    ?>
+                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $stmtUsrRes->name ?></p>
                                     <p class="break-words pl-2 pt-1 font-semibold text-white"><?php echo $message->message ?></p>
                                     <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                                 </div>
@@ -123,7 +118,14 @@ if (!empty($stmtMsgRes)){
                                     </form>
                                 </div>
                                 <div class="bg-gray-600 shadow-lg self-end text-white my-1 w-1/2 rounded-t-xl rounded-bl-xl">
-                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                    <?php
+                                    $stmtUsr = $conn->prepare('SELECT * FROM users WHERE id = :id');
+                                    $stmtUsr->bindParam(':id' , $message->user_id);
+                                    $stmtUsr->execute();
+                                    $stmtUsrRes = $stmtUsr->fetch(5);
+
+                                    ?>
+                                    <p class="text-xs pt-0 pl-2 font-extralight"><?php echo  $stmtUsrRes->name ?></p>
                                     <p class="break-words pl-2 pt-1 font-semibold text-white"><?php echo $message->message ?></p>
                                     <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                                 </div>
@@ -141,7 +143,14 @@ if (!empty($stmtMsgRes)){
                                 $stmtImgRes = $stmtImg->fetch(5);
                                 ?>
                                 <img src="<?php echo './' . $stmtImgRes->path  ?>" class="w-full rounded-t-xl" alt="">
-                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                <?php
+                                $stmtUsr = $conn->prepare('SELECT * FROM users WHERE id = :id');
+                                $stmtUsr->bindParam(':id' , $message->user_id);
+                                $stmtUsr->execute();
+                                $stmtUsrRes = $stmtUsr->fetch(5);
+
+                                ?>
+                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $stmtUsrRes->name ?></p>
                                 <p class="break-words pl-2 pt-1 font-semibold text-gray-700"><?php echo $message->message ?></p>
                                 <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                             </div>
@@ -149,7 +158,14 @@ if (!empty($stmtMsgRes)){
                         }else{
             ?>
                             <div class="bg-blue-200 shadow-lg my-1 w-1/2 rounded-t-xl rounded-br-xl">
-                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $message->user_id ?></p>
+                                <?php
+                                $stmtUsr = $conn->prepare('SELECT * FROM users WHERE id = :id');
+                                $stmtUsr->bindParam(':id' , $message->user_id);
+                                $stmtUsr->execute();
+                                $stmtUsrRes = $stmtUsr->fetch(5);
+
+                                ?>
+                                <p class="text-xs pt-0 pl-2 font-extralight"><?php echo $stmtUsrRes->name ?></p>
                                 <p class="break-words pl-2 pt-1 font-semibold text-gray-700"><?php echo $message->message ?></p>
                                 <p class="text-xs pr-2 font-extralight float-right"><?php echo $message->date ?></p>
                             </div>
