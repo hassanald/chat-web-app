@@ -66,7 +66,7 @@ if (!empty($stmtMsgRes)){
                 <tbody>
                     <?php
                     foreach ($stmtUsrRes as $key => $user){
-                        if ($user->email !== $_SESSION['user']->status){
+                        if ($user->id != $_SESSION['user']->id){
                     ?>
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="py-4 px-6"><?php echo $user->name ?></td>
@@ -77,14 +77,14 @@ if (!empty($stmtMsgRes)){
                                     if ($user->status == 0){
                                     ?>
                                         <form action="../back/blockConfig.php" method="post">
-                                            <input type="hidden" name="blocked_user" value="<?php echo $user->email ?>">
+                                            <input type="hidden" name="blocked_user" value="<?php echo $user->id ?>">
                                             <button type="submit" class="bg-red-600 py-2 px-3 font-semibold text-white border-2 border-red-800 rounded-lg" name="block">Block</button>
                                         </form>
                                     <?php
-                                    }elseif($user['status'] == 1){
+                                    }elseif($user->status == 1){
                                     ?>
                                         <form action="../back/blockConfig.php" method="post">
-                                            <input type="hidden" name="blocked_user" value="<?php echo $user->email ?>">
+                                            <input type="hidden" name="blocked_user" value="<?php echo $user->id ?>">
                                             <button type="submit" class="bg-green-600 py-2 px-3 font-semibold text-white border-2 border-green-800 rounded-lg" name="unblock">Unblock</button>
                                         </form>
                                     <?php
