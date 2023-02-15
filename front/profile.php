@@ -1,12 +1,15 @@
 <?php
 session_start();
+require_once "../database/connection.php";
+
 if (!isset($_SESSION['user'])){
     header('Location: ../front/login.php');
     exit();
 }
 
-$usersData = json_decode(file_get_contents('../database/users.json' ) , true);
-$loggedInUser = $usersData[$_SESSION['user']['email']];
+
+//$usersData = json_decode(file_get_contents('../database/users.json' ) , true);
+//$loggedInUser = $usersData[$_SESSION['user']['email']];
 ?>
 <!doctype html>
 <html lang="en">
@@ -22,21 +25,21 @@ $loggedInUser = $usersData[$_SESSION['user']['email']];
 <body>
     <div class="">
         <div class="mb-6 mt-20">
-            <h1 class="font-semibold text-center text-xl" id="nameOfUser"><?php echo $loggedInUser['name'] ?>'s Profile</h1>
+            <h1 class="font-semibold text-center text-xl" id="nameOfUser"><?php echo $_SESSION['user']->name ?>'s Profile</h1>
         </div>
         <div class="bg-gray-100 w-4/5 mt-2 shadow-lg rounded-lg flex justify-between items-center mx-auto">
             <div id="myContent" class="">
                 <!--Content-->
             </div>
             <div class="w-full max-w-lg m-8">
-                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8" id="form">
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8" id="form" >
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
                             Name:
                         </label>
                         <input class="shadow appearance-none border rounded w-full
                          py-2 px-3 text-gray-700 leading-tight focus:outline-none
-                          focus:shadow-outline"  value="<?php echo $loggedInUser['name']?>" id="username" name="name" type="text"
+                          focus:shadow-outline"  value="<?php echo $_SESSION['user']->name?>" id="username" name="name" type="text"
                                placeholder="Name">
                     </div>
                     <div class="mb-4">
@@ -46,7 +49,7 @@ $loggedInUser = $usersData[$_SESSION['user']['email']];
                         <textarea class="shadow appearance-none border rounded w-full
                          py-2 px-3 text-gray-700 leading-tight focus:outline-none
                           focus:shadow-outline" id="about_me" name="about_me"
-                                  placeholder="About Me..."><?php echo $loggedInUser['about_me']?></textarea>
+                                  placeholder="About Me..."><?php echo $_SESSION['user']->about_me ?></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="image">
@@ -90,7 +93,7 @@ $loggedInUser = $usersData[$_SESSION['user']['email']];
                     contentType: false,
                     success: function (){
                         $('#image').val('')
-                        // console.log(response)
+                        // console.log(this.data)
                         getProfile()
                     }
                 });
