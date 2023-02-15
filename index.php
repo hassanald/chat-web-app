@@ -5,7 +5,7 @@ require_once "./database/connection.php";
 if (!isset($_SESSION['user'])){
     header('Location: ./front/login.php');
     exit();
-}elseif ($_SESSION['user']->role == 'admin' and $_SESSION['user']['status'] !== 1){
+}elseif ($_SESSION['user']->role == 'admin' and $_SESSION['user']->status !== 1){
     header('Location: ./front/adminUser.php');
     exit();
 }
@@ -89,6 +89,7 @@ if (!empty($stmtMsgRes)){
                                 <div class="bg-gray-600 shadow-lg self-end text-white my-1 w-1/2 rounded-t-xl rounded-bl-xl">
                                     <img src="<?php echo './' . $stmtImgRes->path  ?>" class="w-full rounded-t-xl" alt="">
                                     <?php
+
                                         $stmtUsr = $conn->prepare('SELECT * FROM users WHERE id = :id');
                                         $stmtUsr->bindParam(':id' , $message->user_id);
                                         $stmtUsr->execute();
